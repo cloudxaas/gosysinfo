@@ -1,6 +1,6 @@
 package cxsysinfo
 
-func TotalMemory() int {
+func TotalPhysicalMemory() int {
 	in := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(in)
 	if err != nil {
