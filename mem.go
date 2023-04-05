@@ -1,5 +1,10 @@
 package cxsysinfo
 
+import (
+	"syscall"
+)
+
+	
 func TotalPhysicalMemory() int {
 	in := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(in)
