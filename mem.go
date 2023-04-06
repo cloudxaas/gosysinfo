@@ -2,6 +2,7 @@ package cxsysinfo
 
 import (
 	"syscall"
+	"os"
 )
 
 var (
