@@ -4,7 +4,13 @@ import (
 	"syscall"
 )
 
+var (
+	LocalHostname string
+)
 	
+func init() {
+	LocalHostname, _ = os.Hostname()	
+}
 func TotalPhysicalMemory() int {
 	in := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(in)
