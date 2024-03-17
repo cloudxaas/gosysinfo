@@ -40,6 +40,8 @@ func LogMemStatsPeriodically(period time.Duration) {
         buf = strconv.AppendInt(buf, int64(m.Sys), 10)
         buf = append(buf, " B\tNumGC = "...)
         buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
+	buf = append(buf, " B\HeapObjects = "...)
+        buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
         buf = append(buf, '\n')
         os.Stdout.Write(buf)
         time.Sleep(period)
