@@ -8,13 +8,6 @@ import (
 	"runtime"
 )
 
-var (
-	LocalHostname string
-)
-	
-func init() {
-	LocalHostname, _ = os.Hostname()	
-}
 func TotalPhysicalMemory() int {
 	in := &syscall.Sysinfo_t{}
 	err := syscall.Sysinfo(in)
@@ -40,7 +33,7 @@ func LogMemStatsPeriodically(period time.Duration) {
         buf = strconv.AppendInt(buf, int64(m.Sys), 10)
         buf = append(buf, " B\tNumGC = "...)
         buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
-	buf = append(buf, " B\tHeapSys = "...)
+	buf = append(buf, " \tHeapSys = "...)
         buf = strconv.AppendInt(buf, int64(m.HeapSys), 10)
 	buf = append(buf, " B\tHeapInuse = "...)
         buf = strconv.AppendInt(buf, int64(m.HeapInuse), 10)
