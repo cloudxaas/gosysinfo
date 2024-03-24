@@ -24,6 +24,7 @@ func LogMemStatsPeriodically(period time.Duration) {
     var m runtime.MemStats
     var buf []byte
     for {
+	
         runtime.ReadMemStats(&m)
         buf = append(buf[:0], "Alloc = "...)
         buf = strconv.AppendInt(buf, int64(m.Alloc), 10)
@@ -39,7 +40,10 @@ func LogMemStatsPeriodically(period time.Duration) {
         buf = strconv.AppendInt(buf, int64(m.HeapInuse), 10)
 	buf = append(buf, " B\tHeapObjects = "...)
         buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
+        buf = append(buf, " \tNumGoroutines = "...)
+        buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
         buf = append(buf, '\n')
+	    
         os.Stdout.Write(buf)
         time.Sleep(period)
     }
