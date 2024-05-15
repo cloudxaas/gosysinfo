@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+	cxcputhread "github.com/cloudxaas/gocpu/thread"
 )
 
 // FileDescriptorTracker is a struct to track the number of open file descriptors.
@@ -35,6 +36,8 @@ func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracke
 
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf := make([]byte, 0, 1024) // Preallocate buffer to avoid allocations
+	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
+	buf = append(buf, " B\tCPUThread = "...)
 	buf = strconv.AppendInt(buf, int64(m.Alloc), 10)
 	buf = append(buf, " B\tTotalAlloc = "...)
 	buf = strconv.AppendInt(buf, int64(m.TotalAlloc), 10)
