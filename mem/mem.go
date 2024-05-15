@@ -36,8 +36,9 @@ func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracke
 
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf := make([]byte, 0, 1024) // Preallocate buffer to avoid allocations
+	buf = append(buf, "CPUThread = "...)
 	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
-	buf = append(buf, " B\tCPUThread = "...)
+	buf = append(buf, " \tAlloc = "...)
 	buf = strconv.AppendInt(buf, int64(m.Alloc), 10)
 	buf = append(buf, " B\tTotalAlloc = "...)
 	buf = strconv.AppendInt(buf, int64(m.TotalAlloc), 10)
