@@ -29,12 +29,13 @@ func TotalPhysicalMemory() int {
 // LogMemStatsPeriodically logs memory and file descriptor stats periodically.
 func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracker) {
 	var m runtime.MemStats
+	go recordPauseTime()
 	for {
 		runtime.ReadMemStats(&m)
 		logStats(&m, tracker)
 		time.Sleep(period)
 	}
-
+}
 
 func recordPauseTime() {
       for {
