@@ -17,6 +17,32 @@ type FileDescriptorTracker struct {
 	OpenDescriptors int32
 }
 
+
+// FormatDuration formats a time.Duration into a human-readable string without heap allocations.
+func FormatDuration(buf []byte, d time.Duration) []byte {
+    switch {
+    case d < time.Microsecond:
+        buf = append(buf, strconv.Itoa(int(d.Nanoseconds()))...)
+        buf = append(buf, "ns"...)
+    case d < time.Millisecond:
+        buf = append(buf, strconv.Itoa(int(d.Microseconds()))...)
+        buf = append(buf, "µs"...)
+    case d < time.Second:
+        buf = append(buf, strconv.Itoa(int(d.Milliseconds()))...)
+        buf = append(buf, "ms"...)
+    case d < time.Minute:
+        buf = append(buf, strconv.Itoa(int(d.Seconds()))...)
+        buf = append(buf, "s"...)
+    case d < time.Hour:
+        buf = append(buf, strconv.Itoa(int(d.Minutes()))...)
+        buf = append(buf, "m"...)
+    default:
+        buf = append(buf, strconv.Itoa(int(d.Hours()))...)
+        buf = append(buf, "h"...)
+    }
+    return buf
+}
+
 // TotalPhysicalMemory returns the total physical memory of the system.
 func TotalPhysicalMemory() int {
 	in := &syscall.Sysinfo_t{}
@@ -74,7 +100,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf = append(buf, "\tOpenFD = "...)
 	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
   buf = append(buf, "\tGCNSTime = "...)
-  buf = strconv.AppendInt(buf, int64(stwPause), 10)
+    buf = FormatDuration(buf, stwPause)
   buf = append(buf, '\n')
 
 	os.Stdout.Write(buf)
