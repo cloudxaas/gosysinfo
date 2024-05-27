@@ -73,7 +73,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
 	buf = append(buf, "\tOpenFD = "...)
 	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
-  buf = append(buf, "GCNSTime = "...)
+  buf = append(buf, "\tGCNSTime = "...)
   buf = strconv.AppendInt(buf, int64(stwPause), 10)
   buf = append(buf, '\n')
 
