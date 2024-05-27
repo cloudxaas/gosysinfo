@@ -30,7 +30,7 @@ func TotalPhysicalMemory() int {
 // LogMemStatsPeriodically logs memory and file descriptor stats periodically.
 func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracker) {
 	var m runtime.MemStats
-	go recordPauseTime()
+	go recordPauseTime(period)
 	for {
 		runtime.ReadMemStats(&m)
 		logStats(&m, tracker)
@@ -38,7 +38,7 @@ func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracke
 	}
 }
 
-func recordPauseTime() {
+func recordPauseTime(period time.Duration) {
       debug.SetGCPercent(-1)
 
       for {
@@ -46,7 +46,7 @@ func recordPauseTime() {
               runtime.GC() // Trigger garbage collection
               end := time.Now()
               stwPause = end.Sub(start)
-              time.Sleep(1 * time.Second) // Adjust the frequency of GC triggers
+              time.Sleep(period) // Adjust the frequency of GC triggers
       }
 }
 
