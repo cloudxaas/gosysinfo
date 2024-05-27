@@ -3,6 +3,7 @@ package cxsysinfodebug
 import (
 	"os"
 	"runtime"
+	"runtime/debug"
 	"strconv"
 	"syscall"
 	"time"
@@ -38,6 +39,8 @@ func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracke
 }
 
 func recordPauseTime() {
+      debug.SetGCPercent(-1)
+
       for {
               start := time.Now()
               runtime.GC() // Trigger garbage collection
