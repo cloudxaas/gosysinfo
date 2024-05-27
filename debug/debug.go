@@ -46,17 +46,8 @@ func recordPauseTime() {
               runtime.GC() // Trigger garbage collection
               end := time.Now()
               stwPause = end.Sub(start)
-              gcStatsHandler()
               time.Sleep(1 * time.Second) // Adjust the frequency of GC triggers
       }
-}
-
-func gcStatsHandler() {
-        buf := make([]byte, 0, 1024) // Preallocate buffer to avoid allocations
-        buf = append(buf, "GC = "...)
-        buf = strconv.AppendInt(buf, int64(stwPause), 10)
-        buf = append(buf, '\n')
-        os.Stdout.Write(buf)
 }
 
 
@@ -74,11 +65,11 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
 	buf = append(buf, "\tHeapSys = "...)
 	buf = strconv.AppendInt(buf, int64(m.HeapSys), 10)
-	buf = append(buf, " B\tHeapInuse = "...)
+	buf = append(buf, " B\tHeapUse = "...)
 	buf = strconv.AppendInt(buf, int64(m.HeapInuse), 10)
-	buf = append(buf, " B\tHeapObjects = "...)
+	buf = append(buf, " B\tHeapObjs = "...)
 	buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
-	buf = append(buf, "\tNumGoroutines = "...)
+	buf = append(buf, "\tNumGo = "...)
 	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
 	buf = append(buf, "\tOpenFD = "...)
 	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
