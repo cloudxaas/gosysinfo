@@ -22,11 +22,13 @@ func GetDirectorySize(path string) (uint64, error) {
 	// Extract the size from the command output
 	output := strings.Fields(out.String())
 	if len(output) > 0 {
-		size, err := strconv.ParseUint(output[0], 10, 64)
+		// Convert the size from kilobytes to bytes
+		sizeKB, err := strconv.ParseUint(output[0], 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return size, nil
+		sizeBytes := sizeKB * 1024
+		return sizeBytes, nil
 	}
 	return 0, fmt.Errorf("failed to parse du command output")
 }
