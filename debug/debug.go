@@ -59,7 +59,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf = append(buf, "CPU: "...) // CPU id
 	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
 	buf = append(buf, "\tGC: "...) // garbage collection time
-	buf = cxfmtreadable.FormatDuration(buf, m.PauseTotalNs) // Adjusted for the GC pause total time, replace stwPause with actual duration variable if different
+	buf = cxfmtreadable.FormatDuration(buf, time.Duration(m.PauseTotalNs)) // Convert uint64 to time.Duration
 	buf = append(buf, '\n')
 	buf = append(buf, " \tAl: "...) // allocation
 	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Alloc))
