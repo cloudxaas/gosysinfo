@@ -73,7 +73,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf = append(buf, "\tHpUse: "...) // heap in use
 	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapInuse))
 	buf = append(buf, "\tHpObjs: "...) // heap objects
-	buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
+	buf = cxfmtreadable.FormatNumberCompact(int64(m.HeapObjects), buf)
 	buf = append(buf, "\tGoNo: "...) // number of goroutines
 	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
 	buf = append(buf, "\tFD: "...) // file descriptors opened
