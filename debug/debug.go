@@ -56,29 +56,29 @@ func recordPauseTime(period time.Duration) {
 
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf := make([]byte, 0, 1024) // Preallocate buffer to avoid allocations
-	buf = append(buf, "CPU: "...) //cpu id
+	buf = append(buf, "CPU: "...) // CPU id
 	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
-	buf = append(buf, " \tAl: "...) //allocation
-	buf = strconv.AppendInt(buf, int64(m.Alloc), 10)
-	buf = append(buf, " B\tTA: "...) //total alloc
-	buf = strconv.AppendInt(buf, int64(m.TotalAlloc), 10)
-	buf = append(buf, " B\tSys: "...) //sys memory
-	buf = strconv.AppendInt(buf, int64(m.Sys), 10)
-	buf = append(buf, " B\tGCNo: "...) //number of gc
-	buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
-	buf = append(buf, "\tHpSys: "...) //heap of sys
-	buf = strconv.AppendInt(buf, int64(m.HeapSys), 10)
-	buf = append(buf, " B\tHpUse: "...) //heap in use
-	buf = strconv.AppendInt(buf, int64(m.HeapInuse), 10)
-	buf = append(buf, " B\tHpObjs: "...) //heap objs
-	buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
-	buf = append(buf, "\tGoNo: "...)//num of goroutine
-	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
-	buf = append(buf, "\tFD: "...) //file descriptor opened
-	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
-	buf = append(buf, "\tGC: "...) //garbage collection time
-	buf = cxfmtreadable.FormatDuration(buf, stwPause)
+	buf = append(buf, "\tGC: "...) // garbage collection time
+	buf = cxfmtreadable.FormatDuration(buf, m.PauseTotalNs) // Adjusted for the GC pause total time, replace stwPause with actual duration variable if different
 	buf = append(buf, '\n')
+	buf = append(buf, " \tAl: "...) // allocation
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Alloc))
+	buf = append(buf, "\tTA: "...) // total alloc
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.TotalAlloc))
+	buf = append(buf, "\tSys: "...) // sys memory
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Sys))
+	buf = append(buf, "\tGCNo: "...) // number of GC
+	buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
+	buf = append(buf, "\tHpSys: "...) // heap sys
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapSys))
+	buf = append(buf, "\tHpUse: "...) // heap in use
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapInuse))
+	buf = append(buf, "\tHpObjs: "...) // heap objects
+	buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
+	buf = append(buf, "\tGoNo: "...) // number of goroutines
+	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
+	buf = append(buf, "\tFD: "...) // file descriptors opened
+	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
 	os.Stdout.Write(buf)
 }
 
