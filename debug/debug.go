@@ -60,7 +60,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
 	buf = append(buf, "\tGC: "...) // garbage collection time
 	buf = cxfmtreadable.FormatDuration(buf, time.Duration(m.PauseTotalNs)) // Convert uint64 to time.Duration
-	buf = append(buf, " \tAl: "...) // allocation
+	buf = append(buf, "\tAl: "...) // allocation
 	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Alloc))
 	buf = append(buf, "\tTA: "...) // total alloc
 	buf = cxfmtreadable.AppendBytes(buf, uint64(m.TotalAlloc))
