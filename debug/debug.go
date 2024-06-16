@@ -79,30 +79,29 @@ func recordPauseTime(period time.Duration) {
 
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf := make([]byte, 0, 1024) // Preallocate buffer to avoid allocations
-	buf = append(buf, "CPUThread = "...)
+	buf = append(buf, "CPU: "...) //cpu id
 	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
-	buf = append(buf, " \tAlloc = "...)
+	buf = append(buf, " \tAl: "...) //allocation
 	buf = strconv.AppendInt(buf, int64(m.Alloc), 10)
-	buf = append(buf, " B\tTotalAlloc = "...)
+	buf = append(buf, " B\tTA: "...) //total alloc
 	buf = strconv.AppendInt(buf, int64(m.TotalAlloc), 10)
-	buf = append(buf, " B\tSys = "...)
+	buf = append(buf, " B\tSys: "...) //sys memory
 	buf = strconv.AppendInt(buf, int64(m.Sys), 10)
-	buf = append(buf, " B\tNumGC = "...)
+	buf = append(buf, " B\tGCNo: "...) //number of gc
 	buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
-	buf = append(buf, "\tHeapSys = "...)
+	buf = append(buf, "\tHpSys: "...) //heap of sys
 	buf = strconv.AppendInt(buf, int64(m.HeapSys), 10)
-	buf = append(buf, " B\tHeapUse = "...)
+	buf = append(buf, " B\tHpUse: "...) //heap in use
 	buf = strconv.AppendInt(buf, int64(m.HeapInuse), 10)
-	buf = append(buf, " B\tHeapObjs = "...)
+	buf = append(buf, " B\tHpObjs: "...) //heap objs
 	buf = strconv.AppendInt(buf, int64(m.HeapObjects), 10)
-	buf = append(buf, "\tNumGo = "...)
+	buf = append(buf, "\tGoNo: "...)//num of goroutine
 	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
-	buf = append(buf, "\tOpenFD = "...)
+	buf = append(buf, "\tFD: "...) //file descriptor opened
 	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
-  buf = append(buf, "\tGCTime = "...)
-    buf = FormatDuration(buf, stwPause)
-  buf = append(buf, '\n')
-
+	buf = append(buf, "\tGC: "...) //garbage collection time
+	buf = FormatDuration(buf, stwPause)
+	buf = append(buf, '\n')
 	os.Stdout.Write(buf)
 }
 
