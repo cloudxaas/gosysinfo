@@ -43,7 +43,7 @@ func recordPauseTime(period time.Duration) {
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	idx := 0
 	idx += copy(buf[idx:], "CPU: ")
-	idx += copyInt(buf[idx:], int(cxcputhread.CPUThread))
+	idx += copyInt(buf[idx:], int64(cxcputhread.CPUThread))
 	idx += copy(buf[idx:], " GC: ")
 	idx += copyDuration(buf[idx:], time.Duration(m.PauseTotalNs))
 	idx += copy(buf[idx:], " Al: ")
@@ -53,7 +53,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	idx += copy(buf[idx:], " Sys: ")
 	idx += copyBytes(buf[idx:], m.Sys)
 	idx += copy(buf[idx:], " GCNo: ")
-	idx += copyInt(buf[idx:], int(m.NumGC))
+	idx += copyInt(buf[idx:], int64(m.NumGC))
 	idx += copy(buf[idx:], " HpSys: ")
 	idx += copyBytes(buf[idx:], m.HeapSys)
 	idx += copy(buf[idx:], " HpUse: ")
@@ -61,7 +61,7 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	idx += copy(buf[idx:], " HpObj: ")
 	idx += copyCompactNumber(buf[idx:], int64(m.HeapObjects))
 	idx += copy(buf[idx:], " GoNo: ")
-	idx += copyInt(buf[idx:], runtime.NumGoroutine())
+	idx += copyInt(buf[idx:], int64(runtime.NumGoroutine()))
 	idx += copy(buf[idx:], " FD: ")
 	idx += copyInt(buf[idx:], int64(tracker.OpenDescriptors))
 	buf[idx] = '\n'
@@ -70,8 +70,8 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 }
 
 // Helper functions to append various types to the buffer without causing allocations
-func copyInt(dst []byte, num int) int {
-	return copy(dst, strconv.Itoa(num))
+func copyInt(dst []byte, num int64) int {
+	return copy(dst, strconv.FormatInt(num, 10))
 }
 
 func copyBytes(dst []byte, num uint64) int {
