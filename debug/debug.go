@@ -4,10 +4,9 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
-	"syscall"
+	"strconv"
 	"time"
 	cxcputhread "github.com/cloudxaas/gocpu/thread"
-	cxfmtreadable "github.com/cloudxaas/gofmt/readable"
 )
 
 // Static buffer to prevent allocations
@@ -44,7 +43,7 @@ func recordPauseTime(period time.Duration) {
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	idx := 0
 	idx += copy(buf[idx:], "CPU: ")
-	idx += copyInt(buf[idx:], cxcputhread.CPUThread)
+	idx += copyInt(buf[idx:], int(cxcputhread.CPUThread))
 	idx += copy(buf[idx:], " GC: ")
 	idx += copyDuration(buf[idx:], time.Duration(m.PauseTotalNs))
 	idx += copy(buf[idx:], " Al: ")
@@ -76,7 +75,7 @@ func copyInt(dst []byte, num int) int {
 }
 
 func copyBytes(dst []byte, num uint64) int {
-	return copy(dst, cxfmtreadable.FormatBytes(num))
+	return copy(dst, strconv.FormatUint(num, 10))
 }
 
 func copyDuration(dst []byte, d time.Duration) int {
@@ -84,5 +83,5 @@ func copyDuration(dst []byte, d time.Duration) int {
 }
 
 func copyCompactNumber(dst []byte, num int64) int {
-	return copy(dst, cxfmtreadable.FormatNumberCompact(num, nil))
+	return copy(dst, strconv.FormatInt(num, 10))
 }
