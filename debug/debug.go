@@ -5,17 +5,29 @@ import (
 	"runtime"
 	"runtime/debug"
 	"strconv"
+	"syscall"
 	"time"
 	cxcputhread "github.com/cloudxaas/gocpu/thread"
+	cxfmtreadable "github.com/cloudxaas/gofmt/readable"
+
 )
 
-// Static buffer to prevent allocations
-var buf [1024]byte
 var stwPause time.Duration
 
 // FileDescriptorTracker is a struct to track the number of open file descriptors.
 type FileDescriptorTracker struct {
 	OpenDescriptors int32
+}
+
+
+// TotalPhysicalMemory returns the total physical memory of the system.
+func TotalPhysicalMemory() int {
+	in := &syscall.Sysinfo_t{}
+	err := syscall.Sysinfo(in)
+	if err != nil {
+		return 0
+	}
+	return int(in.Totalram) * int(in.Unit)
 }
 
 // LogMemStatsPeriodically logs memory and file descriptor stats periodically.
@@ -30,62 +42,45 @@ func LogMemStatsPeriodically(period time.Duration, tracker *FileDescriptorTracke
 }
 
 func recordPauseTime(period time.Duration) {
-	debug.SetGCPercent(-1)
-	for {
-		start := time.Now()
-		runtime.GC()
-		end := time.Now()
-		stwPause = end.Sub(start)
-		time.Sleep(period)
-	}
+      debug.SetGCPercent(-1)
+
+      for {
+              start := time.Now()
+              runtime.GC() // Trigger garbage collection
+              end := time.Now()
+              stwPause = end.Sub(start)
+              time.Sleep(period) // Adjust the frequency of GC triggers
+      }
 }
+
 
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
-	idx := 0
-	idx += copy(buf[idx:], "CPU: ")
-	idx += copyUint16(buf[idx:], cxcputhread.CPUThread)
-	idx += copy(buf[idx:], " GC: ")
-	idx += copyDuration(buf[idx:], time.Duration(m.PauseTotalNs))
-	idx += copy(buf[idx:], " Al: ")
-	idx += copyBytes(buf[idx:], m.Alloc)
-	idx += copy(buf[idx:], " TA: ")
-	idx += copyBytes(buf[idx:], m.TotalAlloc)
-	idx += copy(buf[idx:], " Sys: ")
-	idx += copyBytes(buf[idx:], m.Sys)
-	idx += copy(buf[idx:], " GCNo: ")
-	idx += copyInt(buf[idx:], int(m.NumGC))
-	idx += copy(buf[idx:], " HpSys: ")
-	idx += copyBytes(buf[idx:], m.HeapSys)
-	idx += copy(buf[idx:], " HpUse: ")
-	idx += copyBytes(buf[idx:], m.HeapInuse)
-	idx += copy(buf[idx:], " HpObj: ")
-	idx += copyInt(buf[idx:], int(m.HeapObjects))
-	idx += copy(buf[idx:], " GoNo: ")
-	idx += copyInt(buf[idx:], runtime.NumGoroutine())
-	idx += copy(buf[idx:], " FD: ")
-	idx += copyInt(buf[idx:], int(tracker.OpenDescriptors))
-	buf[idx] = '\n'
-	idx++
-	os.Stdout.Write(buf[:idx])
+	buf := make([]byte, 0, 1024) // Preallocate buffer to avoid allocations
+	buf = append(buf, "CPU: "...) // CPU id
+	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
+	buf = append(buf, "  GC: "...) // garbage collection time
+	buf = cxfmtreadable.FormatDuration(buf, time.Duration(m.PauseTotalNs)) // Convert uint64 to time.Duration
+	buf = append(buf, "  Al: "...) // allocation
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Alloc))
+	buf = append(buf, "  TA: "...) // total alloc
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.TotalAlloc))
+	buf = append(buf, "  Sys: "...) // sys memory
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Sys))
+	buf = append(buf, "  GCNo: "...) // number of GC
+	buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
+	buf = append(buf, "  HpSys: "...) // heap sys
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapSys))
+	buf = append(buf, "  HpUse: "...) // heap in use
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapInuse))
+	buf = append(buf, "  HpObj: "...) // heap objects
+	buf = cxfmtreadable.FormatNumberCompact(int64(m.HeapObjects), buf)
+	buf = append(buf, "  GoNo: "...) // number of goroutines
+	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
+	buf = append(buf, "  FD: "...) // file descriptors opened
+	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
+	buf = append(buf, '\n')
+	os.Stdout.Write(buf)
 }
 
-// Helper functions to append various types to the buffer without causing allocations
-func copyInt(dst []byte, num int) int {
-	n := strconv.Itoa(num)
-	return copy(dst, n)
-}
-
-func copyUint16(dst []byte, num uint16) int {
-	n := strconv.Itoa(int(num))
-	return copy(dst, n)
-}
-
-func copyBytes(dst []byte, num uint64) int {
-	n := strconv.FormatUint(num, 10)
-	return copy(dst, n)
-}
-
-func copyDuration(dst []byte, d time.Duration) int {
-	n := d.String()
-	return copy(dst, n)
-}
+// The methods to handle the open/close of file descriptors are not shown here.
+// These methods should update tracker.OpenDescriptors appropriately.
