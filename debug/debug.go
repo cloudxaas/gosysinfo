@@ -43,7 +43,7 @@ func recordPauseTime(period time.Duration) {
 func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	idx := 0
 	idx += copy(buf[idx:], "CPU: ")
-	idx += copyInt(buf[idx:], int64(cxcputhread.CPUThread))
+	idx += copyUint16(buf[idx:], cxcputhread.CPUThread)
 	idx += copy(buf[idx:], " GC: ")
 	idx += copyDuration(buf[idx:], time.Duration(m.PauseTotalNs))
 	idx += copy(buf[idx:], " Al: ")
@@ -53,35 +53,39 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	idx += copy(buf[idx:], " Sys: ")
 	idx += copyBytes(buf[idx:], m.Sys)
 	idx += copy(buf[idx:], " GCNo: ")
-	idx += copyInt(buf[idx:], int64(m.NumGC))
+	idx += copyInt(buf[idx:], int(m.NumGC))
 	idx += copy(buf[idx:], " HpSys: ")
 	idx += copyBytes(buf[idx:], m.HeapSys)
 	idx += copy(buf[idx:], " HpUse: ")
 	idx += copyBytes(buf[idx:], m.HeapInuse)
 	idx += copy(buf[idx:], " HpObj: ")
-	idx += copyCompactNumber(buf[idx:], int64(m.HeapObjects))
+	idx += copyInt(buf[idx:], int(m.HeapObjects))
 	idx += copy(buf[idx:], " GoNo: ")
-	idx += copyInt(buf[idx:], int64(runtime.NumGoroutine()))
+	idx += copyInt(buf[idx:], runtime.NumGoroutine())
 	idx += copy(buf[idx:], " FD: ")
-	idx += copyInt(buf[idx:], int64(tracker.OpenDescriptors))
+	idx += copyInt(buf[idx:], int(tracker.OpenDescriptors))
 	buf[idx] = '\n'
 	idx++
 	os.Stdout.Write(buf[:idx])
 }
 
 // Helper functions to append various types to the buffer without causing allocations
-func copyInt(dst []byte, num int64) int {
-	return copy(dst, strconv.FormatInt(num, 10))
+func copyInt(dst []byte, num int) int {
+	n := strconv.Itoa(num)
+	return copy(dst, n)
+}
+
+func copyUint16(dst []byte, num uint16) int {
+	n := strconv.Itoa(int(num))
+	return copy(dst, n)
 }
 
 func copyBytes(dst []byte, num uint64) int {
-	return copy(dst, strconv.FormatUint(num, 10))
+	n := strconv.FormatUint(num, 10)
+	return copy(dst, n)
 }
 
 func copyDuration(dst []byte, d time.Duration) int {
-	return copy(dst, d.String())
-}
-
-func copyCompactNumber(dst []byte, num int64) int {
-	return copy(dst, strconv.FormatInt(num, 10))
+	n := d.String()
+	return copy(dst, n)
 }
