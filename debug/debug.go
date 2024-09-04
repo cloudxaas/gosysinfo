@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 	cxcputhread "github.com/cloudxaas/gocpu/thread"
-	cxfmtreadable "github.com/cloudxaas/gofmt/readable"
+	//cxfmtreadable "github.com/cloudxaas/gofmt/readable"
 )
 
 var stwPause time.Duration
