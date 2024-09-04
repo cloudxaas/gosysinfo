@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 	cxcputhread "github.com/cloudxaas/gocpu/thread"
-	//cxfmtreadable "github.com/cloudxaas/gofmt/readable"
+	cxfmtreadable "github.com/cloudxaas/gofmt/readable"
 )
 
 var stwPause time.Duration
@@ -61,21 +61,30 @@ func logStats(m *runtime.MemStats, tracker *FileDescriptorTracker) {
 	buf := bufferPool.Get().([]byte)
 	buf = buf[:0] // Reset slice length
 
-	buf = appendWithLabel(buf, "CPU: ", int64(cxcputhread.CPUThread))
-	buf = appendWithLabel(buf, "  GC: ", int64(m.PauseTotalNs))
-	buf = appendWithLabel(buf, "  Al: ", int64(m.Alloc))
-	buf = appendWithLabel(buf, "  TA: ", int64(m.TotalAlloc))
-	buf = appendWithLabel(buf, "  Sys: ", int64(m.Sys))
-	buf = appendWithLabel(buf, "  GCNo: ", int64(m.NumGC))
-	buf = appendWithLabel(buf, "  HpSys: ", int64(m.HeapSys))
-	buf = appendWithLabel(buf, "  HpUse: ", int64(m.HeapInuse))
-	buf = appendWithLabel(buf, "  HpObj: ", int64(m.HeapObjects))
-	buf = appendWithLabel(buf, "  GoNo: ", int64(runtime.NumGoroutine()))
-	buf = appendWithLabel(buf, "  FD: ", int64(tracker.OpenDescriptors))
-
+	buf = append(buf, "CPU: "...) // CPU id
+	buf = strconv.AppendInt(buf, int64(cxcputhread.CPUThread), 10)
+	buf = append(buf, "  GC: "...) // garbage collection time
+	buf = cxfmtreadable.FormatDuration(buf, time.Duration(m.PauseTotalNs)) // Convert uint64 to time.Duration
+	buf = append(buf, "  Al: "...) // allocation
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Alloc))
+	buf = append(buf, "  TA: "...) // total alloc
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.TotalAlloc))
+	buf = append(buf, "  Sys: "...) // sys memory
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.Sys))
+	buf = append(buf, "  GCNo: "...) // number of GC
+	buf = strconv.AppendInt(buf, int64(m.NumGC), 10)
+	buf = append(buf, "  HpSys: "...) // heap sys
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapSys))
+	buf = append(buf, "  HpUse: "...) // heap in use
+	buf = cxfmtreadable.AppendBytes(buf, uint64(m.HeapInuse))
+	buf = append(buf, "  HpObj: "...) // heap objects
+	buf = cxfmtreadable.FormatNumberCompact(int64(m.HeapObjects), buf)
+	buf = append(buf, "  GoNo: "...) // number of goroutines
+	buf = strconv.AppendInt(buf, int64(runtime.NumGoroutine()), 10)
+	buf = append(buf, "  FD: "...) // file descriptors opened
+	buf = strconv.AppendInt(buf, int64(tracker.OpenDescriptors), 10)
 	buf = append(buf, '\n')
 	os.Stdout.Write(buf)
-
 	bufferPool.Put(buf)
 }
 
