@@ -73,12 +73,13 @@ func FormatBytes(buf []byte, bytes uint64) []byte {
         exp++
     }
     buf = strconv.AppendFloat(buf, float64(bytes)/float64(div), 'f', 1, 64)
-    buf = append(buf, " "_BCDE[exp]...)
+    buf = append(buf, ' ')
+    buf = append(buf, "KMGTPE"[exp]) // Corrected line
     return buf
 }
 
-// Using a string instead of an array to save on allocations
-const _BCDE = " KMGTPE"
+// Using a constant for unit suffixes
+const unitSuffixes = "KMGTPE"
 
 // FormatDuration formats a duration as a human-readable string.
 func FormatDuration(buf []byte, d time.Duration) []byte {
