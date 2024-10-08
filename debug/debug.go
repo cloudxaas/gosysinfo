@@ -6,7 +6,7 @@ import (
     "strconv"
     "syscall"
     "time"
-    "unsafe"
+    
     cxcputhread "github.com/cloudxaas/gocpu/thread"
 )
 
